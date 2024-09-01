@@ -6,12 +6,14 @@ RUN mkdir /home/miab
 WORKDIR /home/miab/
 
 # Install required packages
-RUN apt-get update && apt-get upgrade -y && \
-    apt-get -y install --no-install-suggests --no-install-recommends \
+RUN apt-get update &&\
+    DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
+RUN apt-get upgrade -y 
+RUN apt-get -y install --no-install-suggests --no-install-recommends \
     git dos2unix p7zip lz4 \
     apt-utils apt-transport-https ca-certificates gnupg \
     python3 \
-    android-sdk default-jre default-jdk \
+    android-sdk openjdk-21-jdk-headless openjdk-21-jre-headless \
     cargo curl \
     wget unzip g++
 
@@ -32,11 +34,11 @@ COPY ./miab.sh .
 WORKDIR /home/miab/Magisk
 
 # Build Magisk
-RUN python3 build.py ndk \ 
-    && python3 build.py stub \
-    && python3 build.py binary magisk \
-    && python3 build.py binary magiskboot \
-    && python3 build.py binary magiskinit 
+RUN python3 build.py ndk  
+RUN python3 build.py stub 
+RUN python3 build.py native magisk 
+RUN python3 build.py native magiskboot 
+RUN python3 build.py native magiskinit 
 
 WORKDIR /home/miab/
 RUN cp Magisk/scripts/boot_patch.sh . && cp Magisk/scripts/util_functions.sh .
